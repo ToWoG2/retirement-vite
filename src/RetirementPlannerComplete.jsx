@@ -200,7 +200,7 @@ const translations = {
   }
 };
 
-const RetirementPlanner = () => {
+const RetirementPlanner = ({ language: propLanguage, onLanguageChange }) => {
   const currentYear = 2026;
   
   const [inputs, setInputs] = useState({
@@ -347,6 +347,11 @@ const RetirementPlanner = () => {
       
       return newInputs;
     });
+    
+    // Notify parent component about language change
+    if (field === 'language' && onLanguageChange) {
+      onLanguageChange(value);
+    }
   };
 
   const handleCurrencyInputChange = (field, valueString) => {
