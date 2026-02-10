@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Bar, BarChart } from 'recharts';
 
 // Translations embedded
@@ -200,10 +200,10 @@ const translations = {
   }
 };
 
-const RetirementPlanner = ({ language: propLanguage, onLanguageChange }) => {
+const RetirementPlanner = ({ language: propLanguage, onLanguageChange, initialInputs, initialOneOffItems }) => {
   const currentYear = 2026;
   
-  const [inputs, setInputs] = useState({
+  const [inputs, setInputs] = useState(initialInputs || {
     retirementYear: 2046,
     birthYear: 1981,
     gender: 'male',
@@ -231,7 +231,21 @@ const RetirementPlanner = ({ language: propLanguage, onLanguageChange }) => {
     liquidityYears: 5
   });
 
-  const [oneOffItems, setOneOffItems] = useState([]);
+  const [oneOffItems, setOneOffItems] = useState(initialOneOffItems || []);
+
+  // Update inputs when initialInputs prop changes (when switching from Data Entry tab)
+  useEffect(() => {
+    if (initialInputs) {
+      setInputs(initialInputs);
+    }
+  }, [initialInputs]);
+
+  // Update oneOffItems when initialOneOffItems prop changes
+  useEffect(() => {
+    if (initialOneOffItems) {
+      setOneOffItems(initialOneOffItems);
+    }
+  }, [initialOneOffItems]);
 
   const [newOneOff, setNewOneOff] = useState({
     year: 2026,

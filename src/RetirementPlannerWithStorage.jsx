@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import LegalTaxFramework from './LegalTaxFramework';
-import RiskProfileAssetAllocation from './RiskProfileAssetAllocation';
 import EnhancedLiquidityStrategy from './EnhancedLiquidityStrategy';
 import LongevityBucketRefinement from './LongevityBucketRefinement';
+import LegacyBucketStrategy from './LegacyBucketStrategy';
 import RetirementPlannerComplete from './RetirementPlannerComplete';
+import DataEntry from './DataEntry';
 
 const RetirementPlannerWithStorage = () => {
-  const [activeTab, setActiveTab] = useState('calculator');
+  const [activeTab, setActiveTab] = useState('data-entry');
   const [savedPlans, setSavedPlans] = useState([]);
   const [currentPlanId, setCurrentPlanId] = useState(null);
   const [planName, setPlanName] = useState('My Plan');
@@ -21,9 +22,40 @@ const RetirementPlannerWithStorage = () => {
     language: 'en',
     currency: 'EUR',
     riskProfile: 'D',
-    // Add more calculator data here as needed
     calculatorData: {}
   });
+
+  // Centralized inputs state shared between DataEntry and Calculator
+  const [centralizedInputs, setCentralizedInputs] = useState({
+    retirementYear: 2046,
+    retirementAge: 65,
+    birthYear: 1981,
+    gender: 'male',
+    countryOfResidence: 'LU',
+    countryOfBirth: 'LU',
+    language: 'en',
+    currentCash: 100000,
+    currentCashCurrency: 'EUR',
+    currentInvestments: 400000,
+    currentInvestmentsCurrency: 'EUR',
+    annualIncome: 120000,
+    annualIncomeCurrency: 'EUR',
+    annualExpenses: 80000,
+    annualExpensesCurrency: 'EUR',
+    retirementIncome: 40000,
+    retirementIncomeCurrency: 'EUR',
+    retirementExpenses: 60000,
+    retirementExpensesCurrency: 'EUR',
+    inflation: 2.5,
+    liquidityReturn: 3.0,
+    longevityReturn: 6.5,
+    legacyReturn: 7.5,
+    riskProfile: 'C',
+    currency: 'EUR',
+    liquidityYears: 5
+  });
+
+  const [oneOffItems, setOneOffItems] = useState([]);
 
   // Load saved plans on mount
   useEffect(() => {
@@ -63,7 +95,11 @@ const RetirementPlannerWithStorage = () => {
       const planData = {
         user_id: user.id,
         plan_name: planName,
-        plan_data: sharedState,
+        plan_data: {
+          ...sharedState,
+          centralizedInputs,
+          oneOffItems
+        },
         updated_at: new Date().toISOString()
       };
 
@@ -110,6 +146,12 @@ const RetirementPlannerWithStorage = () => {
       if (error) throw error;
 
       setSharedState(data.plan_data);
+      if (data.plan_data.centralizedInputs) {
+        setCentralizedInputs(data.plan_data.centralizedInputs);
+      }
+      if (data.plan_data.oneOffItems) {
+        setOneOffItems(data.plan_data.oneOffItems);
+      }
       setCurrentPlanId(data.id);
       setPlanName(data.plan_name);
       setShowLoadDialog(false);
@@ -162,26 +204,55 @@ const RetirementPlannerWithStorage = () => {
       riskProfile: 'D',
       calculatorData: {}
     });
+    setCentralizedInputs({
+      retirementYear: 2046,
+      retirementAge: 65,
+      birthYear: 1981,
+      gender: 'male',
+      countryOfResidence: 'LU',
+      countryOfBirth: 'LU',
+      language: 'en',
+      currentCash: 100000,
+      currentCashCurrency: 'EUR',
+      currentInvestments: 400000,
+      currentInvestmentsCurrency: 'EUR',
+      annualIncome: 120000,
+      annualIncomeCurrency: 'EUR',
+      annualExpenses: 80000,
+      annualExpensesCurrency: 'EUR',
+      retirementIncome: 40000,
+      retirementIncomeCurrency: 'EUR',
+      retirementExpenses: 60000,
+      retirementExpensesCurrency: 'EUR',
+      inflation: 2.5,
+      liquidityReturn: 3.0,
+      longevityReturn: 6.5,
+      legacyReturn: 7.5,
+      riskProfile: 'C',
+      currency: 'EUR',
+      liquidityYears: 5
+    });
+    setOneOffItems([]);
   };
 
   const tabs = [
     { 
-      id: 'calculator', 
+      id: 'data-entry', 
       label: { 
-        en: 'Retirement Calculator', 
-        de: 'Rentenrechner', 
-        fr: 'Calculateur de Retraite' 
+        en: 'Data Entry', 
+        de: 'Dateneingabe', 
+        fr: 'Saisie de Données' 
       }, 
-      icon: '📊' 
+      icon: '📝' 
     },
     { 
-      id: 'asset-allocation', 
+      id: 'calculator', 
       label: { 
-        en: 'Asset Allocation', 
-        de: 'Vermögensallokation', 
-        fr: 'Allocation d\'Actifs' 
+        en: 'Summary', 
+        de: 'Übersicht', 
+        fr: 'Résumé' 
       }, 
-      icon: '📈' 
+      icon: '📊' 
     },
     { 
       id: 'liquidity',
@@ -193,15 +264,6 @@ const RetirementPlannerWithStorage = () => {
       icon: '💰' 
     },
     { 
-      id: 'legal-tax', 
-      label: { 
-        en: 'Legal & Tax Framework', 
-        de: 'Rechts- & Steuerrahmen', 
-        fr: 'Cadre Juridique & Fiscal' 
-      }, 
-      icon: '⚖️' 
-    },
-    { 
       id: 'longevity',
       label: { 
         en: 'Longevity Planning', 
@@ -209,7 +271,25 @@ const RetirementPlannerWithStorage = () => {
         fr: 'Planification de Longévité' 
       }, 
       icon: '⏳' 
-    } 
+    },
+    { 
+      id: 'legacy',
+      label: { 
+        en: 'Legacy Strategy', 
+        de: 'Vermächtnis-Strategie', 
+        fr: 'Stratégie de Legs' 
+      }, 
+      icon: '🎁' 
+    },
+    { 
+      id: 'legal-tax', 
+      label: { 
+        en: 'Legal & Tax Framework', 
+        de: 'Rechts- & Steuerrahmen', 
+        fr: 'Cadre Juridique & Fiscal' 
+      }, 
+      icon: '⚖️' 
+    }
   ];
 
   const t = (obj) => obj[sharedState.language] || obj.en;
@@ -357,29 +437,40 @@ const RetirementPlannerWithStorage = () => {
       </div>
 
       {/* Tab Content */}
-      <div className={activeTab === 'calculator' ? '' : 'max-w-7xl mx-auto p-4 md:p-8'}>
-        {activeTab === 'calculator' && (
+      <div className="max-w-7xl mx-auto">
+        
+        {/* DATA ENTRY TAB - Eingabefelder + Asset Allocation */}
+        {activeTab === 'data-entry' && (
           <div className="animate-fadeIn">
+            <DataEntry 
+              language={sharedState.language}
+              onLanguageChange={(lang) => {
+                setSharedState(prev => ({ ...prev, language: lang }));
+                setCentralizedInputs(prev => ({ ...prev, language: lang }));
+              }}
+              inputs={centralizedInputs}
+              onInputsChange={setCentralizedInputs}
+              oneOffItems={oneOffItems}
+              onOneOffItemsChange={setOneOffItems}
+            />
+          </div>
+        )}
+        
+        {/* CALCULATOR/SUMMARY TAB - Visualisierungen & Results */}
+        {activeTab === 'calculator' && (
+          <div className="animate-fadeIn calculator-summary-mode">
             <RetirementPlannerComplete 
               language={sharedState.language}
               onLanguageChange={(lang) => setSharedState(prev => ({ ...prev, language: lang }))}
+              initialInputs={centralizedInputs}
+              initialOneOffItems={oneOffItems}
             />
           </div>
         )}
         
-        {activeTab === 'asset-allocation' && (
-          <div className="animate-fadeIn">
-            <RiskProfileAssetAllocation 
-              selectedProfile={sharedState.riskProfile}
-              onProfileChange={(profile) => setSharedState(prev => ({ ...prev, riskProfile: profile }))}
-              language={sharedState.language}
-              currency={sharedState.currency}
-            />
-          </div>
-        )}
-        
+        {/* LIQUIDITY STRATEGY TAB */}
         {activeTab === 'liquidity' && (
-          <div className="animate-fadeIn">
+          <div className="animate-fadeIn p-4 md:p-8">
             <EnhancedLiquidityStrategy 
               annualExpenses={60000}
               currentLiquidity={{
@@ -394,8 +485,9 @@ const RetirementPlannerWithStorage = () => {
           </div>
         )}
 
+        {/* LONGEVITY PLANNING TAB */}
         {activeTab === 'longevity' && (
-          <div className="animate-fadeIn">
+          <div className="animate-fadeIn p-4 md:p-8">
             <LongevityBucketRefinement 
               country={sharedState.country}
               gender="male"
@@ -409,8 +501,22 @@ const RetirementPlannerWithStorage = () => {
           </div>
         )}
 
+        {/* LEGACY STRATEGY TAB - NEU! */}
+        {activeTab === 'legacy' && (
+          <div className="animate-fadeIn p-4 md:p-8">
+            <LegacyBucketStrategy 
+              portfolioValue={1000000}
+              timeHorizon={20}
+              riskProfile={sharedState.riskProfile}
+              currency={sharedState.currency}
+              language={sharedState.language}
+            />
+          </div>
+        )}
+
+        {/* LEGAL & TAX TAB */}
         {activeTab === 'legal-tax' && (
-          <div className="animate-fadeIn">
+          <div className="animate-fadeIn p-4 md:p-8">
             <LegalTaxFramework 
               selectedCountry={sharedState.country}
               language={sharedState.language}
@@ -514,6 +620,14 @@ const RetirementPlannerWithStorage = () => {
         }
         .animate-fadeIn {
           animation: fadeIn 0.3s ease-out;
+        }
+        
+        /* Hide input panel in calculator summary mode */
+        .calculator-summary-mode .lg\\:col-span-1 {
+          display: none !important;
+        }
+        .calculator-summary-mode .lg\\:col-span-2 {
+          grid-column: span 3 / span 3 !important;
         }
       `}</style>
     </div>
