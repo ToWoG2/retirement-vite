@@ -19,6 +19,8 @@ const translations = {
     age: "Age",
     currentCash: "Current Cash",
     currentInvestments: "Current Investments/Investable Assets",
+    currentInvestmentsMedium: "Current Investments (Medium Term)",
+    currentInvestmentsLongTerm: "Current Investments (Very Long Term)",
     annualIncomeCurrent: "Annual Income (Current)",
     annualExpensesCurrent: "Annual Expenses (Current)",
     retirementIncomeAnnual: "Retirement Income (Annual)",
@@ -56,6 +58,8 @@ const translations = {
     age: "Alter",
     currentCash: "Aktuelles Bargeld",
     currentInvestments: "Aktuelle Investitionen/Anlagevermögen",
+    currentInvestmentsMedium: "Aktuelle Investitionen (Mittelfristig)",
+    currentInvestmentsLongTerm: "Aktuelle Investitionen (Sehr Langfristig)",
     annualIncomeCurrent: "Jahreseinkommen (Aktuell)",
     annualExpensesCurrent: "Jährliche Ausgaben (Aktuell)",
     retirementIncomeAnnual: "Renteneinkommen (Jährlich)",
@@ -93,6 +97,8 @@ const translations = {
     age: "Âge",
     currentCash: "Liquidités actuelles",
     currentInvestments: "Investissements actuels",
+    currentInvestmentsMedium: "Investissements actuels (Moyen Terme)",
+    currentInvestmentsLongTerm: "Investissements actuels (Très Long Terme)",
     annualIncomeCurrent: "Revenu annuel (actuel)",
     annualExpensesCurrent: "Dépenses annuelles (actuelles)",
     retirementIncomeAnnual: "Revenu de retraite (annuel)",
@@ -139,8 +145,10 @@ const DataEntry = ({ language = 'en', onLanguageChange, inputs: propInputs, onIn
     language: language,
     currentCash: 100000,
     currentCashCurrency: 'EUR',
-    currentInvestments: 400000,
-    currentInvestmentsCurrency: 'EUR',
+    currentInvestmentsMedium: 300000,
+    currentInvestmentsMediumCurrency: 'EUR',
+    currentInvestmentsLongTerm: 100000,
+    currentInvestmentsLongTermCurrency: 'EUR',
     annualIncome: 120000,
     annualIncomeCurrency: 'EUR',
     annualExpenses: 80000,
@@ -150,8 +158,8 @@ const DataEntry = ({ language = 'en', onLanguageChange, inputs: propInputs, onIn
     retirementExpenses: 60000,
     retirementExpensesCurrency: 'EUR',
     inflation: 2.5,
-    liquidityReturn: 3.0,
-    longevityReturn: 6.5,
+    liquidityReturn: 2.0,
+    longevityReturn: 5.0,
     legacyReturn: 7.5,
     riskProfile: 'C',
     currency: 'EUR',
@@ -207,7 +215,8 @@ const DataEntry = ({ language = 'en', onLanguageChange, inputs: propInputs, onIn
         const oldCurrency = inputs.currency;
         if (oldCurrency !== newCurrency) {
           newInputs.currentCashCurrency = newCurrency;
-          newInputs.currentInvestmentsCurrency = newCurrency;
+          newInputs.currentInvestmentsMediumCurrency = newCurrency;
+          newInputs.currentInvestmentsLongTermCurrency = newCurrency;
           newInputs.annualIncomeCurrency = newCurrency;
           newInputs.annualExpensesCurrency = newCurrency;
           newInputs.retirementIncomeCurrency = newCurrency;
@@ -221,7 +230,8 @@ const DataEntry = ({ language = 'en', onLanguageChange, inputs: propInputs, onIn
       const oldCurrency = inputs.currency;
       if (oldCurrency !== newCurrency) {
         newInputs.currentCashCurrency = newCurrency;
-        newInputs.currentInvestmentsCurrency = newCurrency;
+        newInputs.currentInvestmentsMediumCurrency = newCurrency;
+        newInputs.currentInvestmentsLongTermCurrency = newCurrency;
         newInputs.annualIncomeCurrency = newCurrency;
         newInputs.annualExpensesCurrency = newCurrency;
         newInputs.retirementIncomeCurrency = newCurrency;
@@ -447,9 +457,15 @@ const DataEntry = ({ language = 'en', onLanguageChange, inputs: propInputs, onIn
               />
 
               <CurrencyInput 
-                label={t('currentInvestments')} 
-                field="currentInvestments" 
-                currencyField="currentInvestmentsCurrency"
+                label={t('currentInvestmentsMedium')} 
+                field="currentInvestmentsMedium" 
+                currencyField="currentInvestmentsMediumCurrency"
+              />
+
+              <CurrencyInput 
+                label={t('currentInvestmentsLongTerm')} 
+                field="currentInvestmentsLongTerm" 
+                currencyField="currentInvestmentsLongTermCurrency"
               />
 
               <CurrencyInput 
