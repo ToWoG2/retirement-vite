@@ -205,6 +205,7 @@ const RetirementPlanner = ({ language: propLanguage, onLanguageChange, initialIn
   
   const [inputs, setInputs] = useState(initialInputs || {
     retirementYear: 2046,
+    retirementAge: 65,
     birthYear: 1981,
     gender: 'male',
     countryOfResidence: 'LU',
@@ -212,8 +213,10 @@ const RetirementPlanner = ({ language: propLanguage, onLanguageChange, initialIn
     language: 'en',
     currentCash: 100000,
     currentCashCurrency: 'EUR',
-    currentInvestments: 400000,
-    currentInvestmentsCurrency: 'EUR',
+    currentInvestmentsMedium: 300000,
+    currentInvestmentsMediumCurrency: 'EUR',
+    currentInvestmentsLongTerm: 100000,
+    currentInvestmentsLongTermCurrency: 'EUR',
     annualIncome: 120000,
     annualIncomeCurrency: 'EUR',
     annualExpenses: 80000,
@@ -223,10 +226,14 @@ const RetirementPlanner = ({ language: propLanguage, onLanguageChange, initialIn
     retirementExpenses: 60000,
     retirementExpensesCurrency: 'EUR',
     inflation: 2.5,
-    liquidityReturn: 3.0,
-    longevityReturn: 6.5,
+    liquidityReturn: 2.0,
+    longevityReturn: 5.0,
     legacyReturn: 7.5,
     riskProfile: 'C',
+    accountTaxStatus: 'taxable',
+    investmentObjective: 'growth',
+    geographicFocus: 'global',
+    assetClasses: 'traditional',
     currency: 'EUR',
     liquidityYears: 5
   });
@@ -527,14 +534,20 @@ const RetirementPlanner = ({ language: propLanguage, onLanguageChange, initialIn
     
     // Convert all to base currency
     const currentCashBase = convertToBaseCurrency(inputs.currentCash, inputs.currentCashCurrency);
-    const currentInvestmentsBase = convertToBaseCurrency(inputs.currentInvestments, inputs.currentInvestmentsCurrency);
+    const currentInvestmentsMediumBase = convertToBaseCurrency(inputs.currentInvestmentsMedium || 0, inputs.currentInvestmentsMediumCurrency);
+    const currentInvestmentsLongTermBase = convertToBaseCurrency(inputs.currentInvestmentsLongTerm || 0, inputs.currentInvestmentsLongTermCurrency);
     const annualIncomeBase = convertToBaseCurrency(inputs.annualIncome, inputs.annualIncomeCurrency);
     const annualExpensesBase = convertToBaseCurrency(inputs.annualExpenses, inputs.annualExpensesCurrency);
-    const retirementIncomeBase = convertToBaseCurrency(inputs.retirementIncome, inputs.retirementIncomeCurrency);
-    const retirementExpensesBase = convertToBaseCurrency(inputs.retirementExpenses, inputs.retirementExpensesCurrency);
     
-    // Grow investments until retirement
-    let investmentsAtRetirement = currentInvestmentsBase;
+    // Inflate retirement income and expenses from the start
+    const retirementIncomeBase = convertToBaseCurrency(inputs.retirementIncome, inputs.retirementIncomeCurrency) * Math.pow(1 + inflationRate, yearsToRetirement);
+    const retirementExpensesBase = convertToBaseCurrency(inputs.retirementExpenses, inputs.retirementExpensesCurrency) * Math.pow(1 + inflationRate, yearsToRetirement);
+    
+    // Grow Medium Term investments until retirement (goes to Longevity)
+    let longevityInvestments = currentInvestmentsMediumBase;
+    
+    // Long Term investments go directly to Legacy (grow separately)
+    let legacyInvestments = currentInvestmentsLongTermBase;
     const annualSavings = annualIncomeBase - annualExpensesBase;
     
     const preRetirementData = [];
@@ -557,8 +570,12 @@ const RetirementPlanner = ({ language: propLanguage, onLanguageChange, initialIn
       const inflatedIncome = annualIncomeBase * Math.pow(1 + inflationRate, i);
       const inflatedExpenses = annualExpensesBase * Math.pow(1 + inflationRate, i);
 
-      investmentsAtRetirement += annualSavings + yearAdjustment;
-      investmentsAtRetirement *= (1 + inputs.longevityReturn / 100);
+      // Grow Medium Term investments (Longevity)
+      longevityInvestments += annualSavings + yearAdjustment;
+      longevityInvestments *= (1 + inputs.longevityReturn / 100);
+      
+      // Grow Long Term investments (Legacy)
+      legacyInvestments *= (1 + inputs.legacyReturn / 100);
 
       preRetirementData.push({
         age,
@@ -567,14 +584,14 @@ const RetirementPlanner = ({ language: propLanguage, onLanguageChange, initialIn
         expenses: inflatedExpenses,
         oneOffs: oneOffTotal,
         liquidityStrategy: 0,
-        longevityStrategy: investmentsAtRetirement,
-        legacyStrategy: 0,
-        totalWealth: investmentsAtRetirement
+        longevityStrategy: longevityInvestments,
+        legacyStrategy: legacyInvestments,
+        totalWealth: longevityInvestments + legacyInvestments
       });
     }
 
-    // Total wealth at retirement = cash + investments
-    const totalWealthAtRetirement = currentCashBase + investmentsAtRetirement;
+    // Total wealth at retirement = cash + longevity investments + legacy investments
+    const totalWealthAtRetirement = currentCashBase + longevityInvestments + legacyInvestments;
     
     // NEW ALLOCATION LOGIC AT RETIREMENT:
     // 1. Liquidity = liquidityYears × first year's annual expenses
@@ -630,11 +647,11 @@ const RetirementPlanner = ({ language: propLanguage, onLanguageChange, initialIn
     }
     
     if (iterations >= maxIterations) {
-      longevityNeeded = totalWealthAtRetirement - liquidityNeeded;
+      longevityNeeded = totalWealthAtRetirement - liquidityNeeded - legacyInvestments;
     }
     
-    // 3. Legacy = remainder
-    const legacyAmount = Math.max(0, totalWealthAtRetirement - liquidityNeeded - longevityNeeded);
+    // 3. Legacy = Long Term investments that have been growing + any remainder
+    const legacyAmount = Math.max(legacyInvestments, totalWealthAtRetirement - liquidityNeeded - longevityNeeded);
 
     // Simulation through retirement
     const projectionData = [];
@@ -731,7 +748,10 @@ const RetirementPlanner = ({ language: propLanguage, onLanguageChange, initialIn
       legacyAmount: convertToEUR(calculations.legacyAmount),
       totalAllocated: convertToEUR(calculations.totalAllocated),
       currentCash: convertToEUR(convertToBaseCurrency(inputs.currentCash, inputs.currentCashCurrency)),
-      currentInvestments: convertToEUR(convertToBaseCurrency(inputs.currentInvestments, inputs.currentInvestmentsCurrency)),
+      currentInvestments: convertToEUR(
+        convertToBaseCurrency(inputs.currentInvestmentsMedium || 0, inputs.currentInvestmentsMediumCurrency) +
+        convertToBaseCurrency(inputs.currentInvestmentsLongTerm || 0, inputs.currentInvestmentsLongTermCurrency)
+      ),
       annualIncome: convertToEUR(convertToBaseCurrency(inputs.annualIncome, inputs.annualIncomeCurrency)),
       annualExpenses: convertToEUR(convertToBaseCurrency(inputs.annualExpenses, inputs.annualExpensesCurrency)),
       retirementIncome: convertToEUR(convertToBaseCurrency(inputs.retirementIncome, inputs.retirementIncomeCurrency)),
@@ -1158,7 +1178,10 @@ const RetirementPlanner = ({ language: propLanguage, onLanguageChange, initialIn
                     </tr>
                     <tr>
                       <td className="py-2 text-slate-600">{t('currentInvestments')}</td>
-                      <td className="py-2 text-right">{formatCurrency(convertToBaseCurrency(inputs.currentInvestments, inputs.currentInvestmentsCurrency))}</td>
+                      <td className="py-2 text-right">{formatCurrency(
+                        convertToBaseCurrency(inputs.currentInvestmentsMedium || 0, inputs.currentInvestmentsMediumCurrency) +
+                        convertToBaseCurrency(inputs.currentInvestmentsLongTerm || 0, inputs.currentInvestmentsLongTermCurrency)
+                      )}</td>
                       <td className="py-2 text-right">{formatCurrency(keyMetricsInEUR.currentInvestments, 'EUR')}</td>
                     </tr>
                     <tr>
@@ -1319,7 +1342,10 @@ const RetirementPlanner = ({ language: propLanguage, onLanguageChange, initialIn
                             {row.liquidityStrategy > 0 ? formatCurrency(row.liquidityStrategy) : '-'}
                           </td>
                           <td className="py-2 px-2 text-right text-purple-700">
-                            {row.longevityStrategy > 0 ? formatCurrency(row.longevityStrategy) : '-'}
+                            {row.longevityStrategy > 0 
+                              ? formatCurrency(row.longevityStrategy) 
+                              : (index === calculations.detailedAgeTable.length - 1 ? '1' : '-')
+                            }
                           </td>
                           <td className="py-2 px-2 text-right text-emerald-700">
                             {formatCurrency(row.legacyStrategy)}

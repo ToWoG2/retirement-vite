@@ -53,6 +53,10 @@ const RetirementPlannerWithStorage = () => {
     longevityReturn: 5.0,
     legacyReturn: 7.5,
     riskProfile: 'C',
+    accountTaxStatus: 'taxable',
+    investmentObjective: 'growth',
+    geographicFocus: 'global',
+    assetClasses: 'traditional',
     currency: 'EUR',
     liquidityYears: 5
   });
@@ -233,6 +237,10 @@ const RetirementPlannerWithStorage = () => {
       longevityReturn: 5.0,
       legacyReturn: 7.5,
       riskProfile: 'C',
+      accountTaxStatus: 'taxable',
+      investmentObjective: 'growth',
+      geographicFocus: 'global',
+      assetClasses: 'traditional',
       currency: 'EUR',
       liquidityYears: 5
     });

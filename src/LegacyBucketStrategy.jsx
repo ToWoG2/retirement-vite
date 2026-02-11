@@ -30,7 +30,7 @@ const LegacyBucketStrategy = ({
       de: 'Universitäts-Endowment-Modell',
       fr: 'Modèle de Dotation Universitaire'
     },
-    endowmentModel: {
+    endowmentStrategyModel: {
       en: 'Endowment Strategy Model',
       de: 'Endowment-Strategie-Modell',
       fr: 'Modèle de Stratégie de Dotation'

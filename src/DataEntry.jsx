@@ -31,6 +31,18 @@ const translations = {
     legacyReturn: "Legacy Return (%)",
     riskProfile: "Risk Profile",
     liquidityPeriod: "Liquidity Period (Years)",
+    accountTaxStatus: "Account Tax Status",
+    taxable: "Taxable Account",
+    taxAdvantaged: "Tax-Advantaged Account",
+    investmentObjective: "Investment Objective",
+    growth: "Growth / Capital Appreciation",
+    income: "Income / Cash Flow",
+    geographicFocus: "Geographic Focus",
+    global: "Global (MSCI World)",
+    regional: "Regional / Local Bias",
+    assetClasses: "Asset Classes",
+    traditional: "Traditional Only",
+    withNTAC: "Including NTAC (Non-Traditional)",
     oneOffIncomeExpenses: "One-Off Income/Expenses",
     year: "Year",
     type: "Type",
@@ -70,6 +82,18 @@ const translations = {
     legacyReturn: "Vermächtnisrendite (%)",
     riskProfile: "Risikoprofil",
     liquidityPeriod: "Liquiditätszeitraum (Jahre)",
+    accountTaxStatus: "Konto-Steuerstatus",
+    taxable: "Steuerpflichtiges Konto",
+    taxAdvantaged: "Steuerbegünstigtes Konto",
+    investmentObjective: "Anlageziel",
+    growth: "Wachstum / Kapitalzuwachs",
+    income: "Erträge / Cash Flow",
+    geographicFocus: "Geografischer Fokus",
+    global: "Global (MSCI World)",
+    regional: "Regional / Lokaler Fokus",
+    assetClasses: "Anlageklassen",
+    traditional: "Nur Traditionell",
+    withNTAC: "Mit NTAC (Nicht-traditionell)",
     oneOffIncomeExpenses: "Einmalige Einnahmen/Ausgaben",
     year: "Jahr",
     type: "Typ",
@@ -109,6 +133,18 @@ const translations = {
     legacyReturn: "Rendement d'héritage (%)",
     riskProfile: "Profil de risque",
     liquidityPeriod: "Période de liquidité (années)",
+    accountTaxStatus: "Statut Fiscal du Compte",
+    taxable: "Compte Imposable",
+    taxAdvantaged: "Compte Fiscalement Avantageux",
+    investmentObjective: "Objectif d'Investissement",
+    growth: "Croissance / Plus-value",
+    income: "Revenu / Cash Flow",
+    geographicFocus: "Focus Géographique",
+    global: "Global (MSCI World)",
+    regional: "Régional / Focus Local",
+    assetClasses: "Classes d'Actifs",
+    traditional: "Traditionnel Uniquement",
+    withNTAC: "Avec NTAC (Non-traditionnel)",
     oneOffIncomeExpenses: "Revenus/Dépenses ponctuels",
     year: "Année",
     type: "Type",
@@ -162,6 +198,10 @@ const DataEntry = ({ language = 'en', onLanguageChange, inputs: propInputs, onIn
     longevityReturn: 5.0,
     legacyReturn: 7.5,
     riskProfile: 'C',
+    accountTaxStatus: 'taxable',
+    investmentObjective: 'growth',
+    geographicFocus: 'global',
+    assetClasses: 'traditional',
     currency: 'EUR',
     liquidityYears: 5
   };
@@ -557,6 +597,61 @@ const DataEntry = ({ language = 'en', onLanguageChange, inputs: propInputs, onIn
                   <option value="D">D - Growth</option>
                   <option value="E">E - Aggressive Growth</option>
                 </select>
+              </div>
+
+              {/* Portfolio Dimensions */}
+              <div className="pt-4 border-t border-slate-200">
+                <h3 className="text-sm font-semibold text-slate-700 mb-3">Portfolio Structure</h3>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">{t('accountTaxStatus')}</label>
+                    <select
+                      value={inputs.accountTaxStatus}
+                      onChange={(e) => handleInputChange('accountTaxStatus', e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    >
+                      <option value="taxable">{t('taxable')}</option>
+                      <option value="taxAdvantaged">{t('taxAdvantaged')}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">{t('investmentObjective')}</label>
+                    <select
+                      value={inputs.investmentObjective}
+                      onChange={(e) => handleInputChange('investmentObjective', e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    >
+                      <option value="growth">{t('growth')}</option>
+                      <option value="income">{t('income')}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">{t('geographicFocus')}</label>
+                    <select
+                      value={inputs.geographicFocus}
+                      onChange={(e) => handleInputChange('geographicFocus', e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    >
+                      <option value="global">{t('global')}</option>
+                      <option value="regional">{t('regional')}</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">{t('assetClasses')}</label>
+                    <select
+                      value={inputs.assetClasses}
+                      onChange={(e) => handleInputChange('assetClasses', e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    >
+                      <option value="traditional">{t('traditional')}</option>
+                      <option value="withNTAC">{t('withNTAC')}</option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
 
