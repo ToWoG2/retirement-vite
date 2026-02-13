@@ -153,7 +153,7 @@ const RiskProfileAssetAllocation = ({
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-lg p-6 text-white">
         <h2 className="text-2xl font-bold mb-2">{t('title')}</h2>
         <p className="text-purple-100 text-sm">
-          Based on UBS Wealth Way Portfolio-Based Approach
+          Based on Liquidity, Longevity, and Legacy strategies Portfolio-Based Approach
         </p>
       </div>
 

@@ -1,5 +1,5 @@
 // Strategic Asset Allocation (SAA) Data
-// Based on UBS Wealth Way Portfolio-Based Approach
+// Based on three strategies Portfolio-Based Approach
 // Last Updated: February 2026
 
 export const riskProfiles = {
